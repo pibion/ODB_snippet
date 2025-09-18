@@ -10,7 +10,7 @@ With in start or end json, it call the following filter functions:
         Final function to do this task: filter_and_clean_json
     added below 2 after Sep, 2025
     5) filter_equipment_subtrees   ( removes Removes 'Common', 'Variables', and 'Statistics' subtrees from each Equipment/XXX entry.) 
-    6) delete_unactive_detectors (looking at the ['Equipment']['EBuilder']["Readback"]["Enabled detectors"] only saving the active detector.
+    # 6) delete_unactive_detectors (looking at the ['Equipment']['EBuilder']["Readback"]["Enabled detectors"] only saving the active detector. (not applied this 6)
          Final function to do this task: filter_and_clean_json
     
 In case of dumping odb_end json, After the above filter function, only those keys and values from odb_end json 
@@ -400,46 +400,46 @@ def filter_equipment_subtrees(data):
 
     return data
 
-def get_enabled_detectors(data):
-    """
-    Given ODB JSON, return the detector indices that are enabled. delete_unactive_detectors function uses this function
-    """
-    return [
-        i for i, v in enumerate(
-            data['Equipment']['EBuilder']["Readback"]["Enabled detectors"]
-        ) if v
-    ]
+# def get_enabled_detectors(data):
+#     """
+#     Given ODB JSON, return the detector indices that are enabled. delete_unactive_detectors function uses this function
+#     """
+#     return [
+#         i for i, v in enumerate(
+#             data['Equipment']['EBuilder']["Readback"]["Enabled detectors"]
+#         ) if v
+#     ]
 
 
-def delete_unactive_detectors(data):
-    """
-    Apply cuts and return a filtered copy of data:
-    1) Keep only Equipment/readouthistoryXX where XX is enabled.
-    2) Keep only Detector/DetXX where XX is enabled.
-    """
-    import copy
-    filtered = copy.deepcopy(data)  # make a copy so original is untouched
+# def delete_unactive_detectors(data):
+#     """
+#     Apply cuts and return a filtered copy of data:
+#     1) Keep only Equipment/readouthistoryXX where XX is enabled.
+#     2) Keep only Detector/DetXX where XX is enabled.
+#     """
+#     import copy
+#     filtered = copy.deepcopy(data)  # make a copy so original is untouched
 
-    enabled_detectors = get_enabled_detectors(data)
+#     enabled_detectors = get_enabled_detectors(data)
 
-    # --- Cut 1: keep only Equipment/readouthistoryXX for enabled detectors ---
-    if "Equipment" in filtered:
-        for k in list(filtered["Equipment"].keys()):
-            if k.startswith("readouthistory"):
-                suffix = k.replace("readouthistory", "")
-                if suffix.isdigit():
-                    det_index = int(suffix)
-                    if det_index not in enabled_detectors:
-                        del filtered["Equipment"][k]
+#     # --- Cut 1: keep only Equipment/readouthistoryXX for enabled detectors ---
+#     if "Equipment" in filtered:
+#         for k in list(filtered["Equipment"].keys()):
+#             if k.startswith("readouthistory"):
+#                 suffix = k.replace("readouthistory", "")
+#                 if suffix.isdigit():
+#                     det_index = int(suffix)
+#                     if det_index not in enabled_detectors:
+#                         del filtered["Equipment"][k]
 
-    # --- Cut 2: keep only Detector/DetXX for enabled detectors ---
-    if "Detectors" in filtered:
-        for k in list(filtered["Detectors"].keys()):
-            det_index = int(k.replace("Det", ""))
-            if det_index not in enabled_detectors:
-                del filtered["Detectors"][k]
+#     # --- Cut 2: keep only Detector/DetXX for enabled detectors ---
+#     if "Detectors" in filtered:
+#         for k in list(filtered["Detectors"].keys()):
+#             det_index = int(k.replace("Det", ""))
+#             if det_index not in enabled_detectors:
+#                 del filtered["Detectors"][k]
 
-    return filtered
+#     return filtered
 
 def filter_and_clean_json(json_data):
     """
@@ -476,7 +476,7 @@ def filter_and_clean_json(json_data):
     updated_json = find_and_delete_common_keys(readback_paths, settings_paths, filtered_json)
     updated_json = find_and_delete_common_keys_with_extra_cut(readback_paths, settings_paths, updated_json)
     updated_json = filter_equipment_subtrees(updated_json)
-    updated_json = delete_unactive_detectors(updated_json)
+    # updated_json = delete_unactive_detectors(updated_json)
     #updated_json = json.dumps(updated_json, separators=(',', ':'), indent=None)
     #if isinstance(updated_json, str):
     #    updated_json = json.loads(updated_json)
